@@ -1,0 +1,69 @@
+<?php
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
+
+class Event extends Model
+{
+    use HasFactory, SoftDeletes;
+    protected $fillable = [
+        'uuid',
+        'organizer_id',
+        'title',
+        'slug',
+        'category',
+        'description',
+        'image_url',
+        'is_online',
+        'meeting_link',
+        'event_link',
+        'status',
+        'visibility',
+        'type',
+        'country',
+        'state',
+        'start_date',
+        'end_date',
+        'start_time',
+        'end_time',
+        'timezone',
+        'venue',
+        'price',
+        'tags',
+    ];
+
+    protected $casts = [
+        'is_online' => 'boolean',
+        'visibility' => 'boolean',
+      
+        'tags' => 'array',
+    ];
+
+    public function organizer()
+    {
+        return $this->belongsTo(User::class, 'organizer_id');
+    }
+
+    public function schedules()
+    {
+        return $this->hasMany(EventSchedule::class);
+    }
+
+    public function subscriptions()
+    {
+        return $this->hasMany(EventSubscription::class);
+    }
+
+    protected static function boot()
+    {
+        parent::boot();
+        static::creating(function ($model) {
+            if (empty($model->uuid)) {
+                $model->uuid = (string) \Illuminate\Support\Str::uuid();
+            }
+        });
+    }
+}

@@ -1,0 +1,281 @@
+<?php
+
+namespace App\Http\Controllers;
+
+use App\Models\Conversation;
+use App\Models\Message;
+use App\Events\InboxUpdated;
+use App\Events\MessageSent;
+use App\Events\MessageDeleted;
+use App\Events\MessageRead;
+use Illuminate\Http\Request;
+use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Str;
+
+class MessagesController extends Controller
+{
+    // POST /v1/messages
+    public function index(Request $request) {
+        $data['user'] = $request->user();
+        $data['conversations'] = Conversation::whereHas('participants', function ($q) use ($data) {
+            $q->where('users.id', $data['user']->id);
+        })->with(['participants', 'messages' => function ($q) use ($data) {
+            $q->orderBy('created_at', 'asc');
+        }])->get();
+       return view('dashboard.message',$data);
+    }
+    public function store(Request $request)
+    {
+        try {
+            $user = $request->user();
+
+            $validator = Validator::make($request->all(), [
+                'content' => ['nullable', 'string'],
+                'conversationId' => ['nullable', 'integer', 'exists:conversations,id'],
+                'conversationUuid' => ['nullable', 'string', 'exists:conversations,uuid'],
+                'messageType' => ['required', 'in:text,image,file,voicenote'],
+                'file' => ['nullable'],
+            ]);
+            if ($validator->fails()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Validation errors',
+                    'errors' => $validator->errors()
+                ], 422);
+            }
+            $data = $validator->validated();
+
+            if (empty($data['conversationId']) && empty($data['conversationUuid'])) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Validation errors',
+                    'errors' => ['conversation' => ['conversationId or conversationUuid is required']]
+                ], 422);
+            }
+
+            $conversation = Conversation::when(!empty($data['conversationId']), function ($q) use ($data) {
+                    $q->where('id', $data['conversationId']);
+                })
+                ->when(!empty($data['conversationUuid']), function ($q) use ($data) {
+                    $q->orWhere('uuid', $data['conversationUuid']);
+                })
+                ->firstOrFail();
+
+            if (!$conversation->participants()->where('users.id', $user->id)->exists()) {
+                return response()->json(['success' => false, 'message' => 'Forbidden'], 403);
+            }
+
+            $storedFileUrl = null;
+            $storedFileMime = null;
+            if ($request->hasFile('file')) {
+                $file = $request->file('file');
+                $basePublicRoot = public_path('mybridge-backend-files/public');
+                $uploadDir = is_dir($basePublicRoot)
+                    ? $basePublicRoot . '/uploads/messages'
+                    : public_path('uploads/messages');
+                if (!is_dir($uploadDir)) {
+                    @mkdir($uploadDir, 0755, true);
+                }
+                $ext = $file->getClientOriginalExtension();
+                $baseName = 'msg-' . ($data['conversationId'] ?? 'uuid') . '-' . time();
+                $fileName = $baseName . ($ext ? '.' . $ext : '');
+                $file->move($uploadDir, $fileName);
+                $storedFileUrl = '/uploads/messages/' . $fileName;
+                $storedFileMime = $file->getClientMimeType();
+            } elseif ($data['messageType'] !== 'text') {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Validation errors',
+                    'errors' => ['file' => ['file is required for non-text messages']]
+                ], 422);
+            }
+
+            $message = Message::create([
+                'conversation_id' => $conversation->id,
+                'sender_id' => $user->id,
+                'message_type' => $data['messageType'],
+                'content' => $data['content'] ?? null,
+                'file_url' => $storedFileUrl,
+                'file_mime_type' => $storedFileMime,
+            ]);
+
+            $conversation->touch();
+            $conversation->load(['participants:id,uuid,full_name,email']);
+
+            // Broadcast to conversation channels (existing real-time messaging)
+            broadcast(new MessageSent($conversation->id, (string)$conversation->uuid, $this->formatMessage($message)))->toOthers();
+
+            // Broadcast inbox updates to all participants so their inbox reflects the new last message
+            foreach ($conversation->participants as $participant) {
+                $item = $this->formatInboxItem($conversation, $participant, $message);
+                broadcast(new InboxUpdated($participant->id, (string)$participant->uuid, $item))->toOthers();
+            }
+
+            return response()->json($this->formatMessage($message), 201);
+        } catch (\Throwable $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'An error occurred',
+                'error' => $e->getMessage(),
+            ], 500);
+        }
+    }
+
+    // DELETE /v1/messages/{messageId}
+    public function destroy(Request $request)
+    {
+        try {
+            $user = $request->user();
+            $validator = Validator::make($request->all(), [
+                'messageUuid' => ['required', 'string', 'exists:messages,uuid'],
+            ]);
+            if ($validator->fails()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Validation errors',
+                    'errors' => $validator->errors()
+                ], 422);
+            }
+            $data = $validator->validated();
+
+            $message = Message::where('uuid', $data['messageUuid'])->firstOrFail();
+            $conversation = $message->conversation;
+            if (!$conversation->participants()->where('users.id', $user->id)->exists()) {
+                return response()->json(['success' => false, 'message' => 'Forbidden'], 403);
+            }
+            if ($message->sender_id !== $user->id) {
+                return response()->json(['success' => false, 'message' => 'Only sender can delete this message'], 403);
+            }
+
+            $message->delete();
+
+            broadcast(new MessageDeleted($conversation->id, (string)$conversation->uuid, (string)$message->uuid))->toOthers();
+            return response()->json([
+                'messageId' => (string)$message->id,
+                'messageUuid' => (string)$message->uuid,
+                'status' => 'deleted',
+            ]);
+        } catch (\Throwable $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'An error occurred',
+                'error' => $e->getMessage(),
+            ], 500);
+        }
+    }
+
+    // POST /v1/messages/{messageId}/read
+    public function markRead( Request $request)
+    {
+        try {
+            $validator = Validator::make($request->all(), [
+                'messageUuid' => ['required', 'string', 'exists:messages,uuid'],
+            ]);
+            if ($validator->fails()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Validation errors',
+                    'errors' => $validator->errors()
+                ], 422);
+            }
+            $data = $validator->validated();
+
+            $user = $request->user();
+            $message = Message::where('uuid', $data['messageUuid'])->firstOrFail();
+            $conversation = $message->conversation;
+
+            if (!$conversation->participants()->where('users.id', $user->id)->exists()) {
+                return response()->json(['success' => false, 'message' => 'Forbidden'], 403);
+            }
+            $now = now();
+            if ($message->sender_id !== $user->id) {
+                Message::where('conversation_id', $conversation->id)
+                    ->where('id', '<=', $message->id)
+                    ->whereNull('read_at')
+                    ->where('sender_id', '!=', $user->id)
+                    ->update(['read_at' => $now]);
+
+                broadcast(new MessageRead($conversation->id, (string)$conversation->uuid, (string)$message->uuid, (string)$user->uuid, $now->toISOString()))->toOthers();
+            }
+
+            return response()->json([
+                'messageId' => (string)$message->id,
+                'messageUuid' => (string)$message->uuid,
+                'status' => 'read',
+                'readAt' => $now,
+            ]);
+        } catch (\Throwable $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'An error occurred',
+                'error' => $e->getMessage(),
+            ], 500);
+        }
+    }
+
+    private function formatMessage(Message $m): array
+    {
+        return [
+            'id' => $m->id,
+            'uuid' => $m->uuid,
+            'conversationId' => $m->conversation_id,
+            'senderId' => $m->sender_id,
+            'messageType' => $m->message_type,
+            'content' => $m->content,
+            'fileData' => $m->file_url ? [
+                'url' => $this->toAbsoluteUrl($m->file_url),
+                'mimeType' => $m->file_mime_type,
+            ] : null,
+            'readAt' => $m->read_at,
+            'createdAt' => $m->created_at,
+        ];
+    }
+
+    private function formatInboxItem(Conversation $conv, $receiver, ?Message $last): array
+    {
+        $item = [
+            'conversationId' => $conv->id,
+            'conversationUuid' => $conv->uuid,
+            'type' => $conv->type,
+            'name' => $conv->name,
+            'updatedAt' => $conv->updated_at,
+            'lastMessage' => $last ? [
+                'id' => $last->id,
+                'uuid' => $last->uuid,
+                'type' => $last->message_type,
+                'content' => $last->content,
+                'fileUrl' => $this->toAbsoluteUrl($last->file_url),
+                'createdAt' => $last->created_at,
+                'senderId' => $last->sender_id,
+            ] : null,
+        ];
+
+        if ($conv->type === 'direct') {
+            $other = $conv->participants->firstWhere('id', '!=', $receiver->id);
+            if ($other) {
+                $item['otherParticipant'] = [
+                    'id' => $other->id,
+                    'uuid' => $other->uuid,
+                    'full_name' => $other->full_name,
+                    'email' => $other->email,
+                ];
+            }
+        } else {
+            $item['memberCount'] = $conv->participants->count();
+        }
+
+        return $item;
+    }
+
+    private function toAbsoluteUrl(?string $path): ?string
+    {
+        if (empty($path)) {
+            return null;
+        }
+        if (Str::startsWith($path, ['http://', 'https://'])) {
+            return $path;
+        }
+        return rtrim('https://api.mybridgeinternational.org/mybridge-backend-files/public', '/') . $path;
+    }
+}
