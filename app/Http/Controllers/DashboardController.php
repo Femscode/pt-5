@@ -6,6 +6,11 @@ use App\Models\Event;
 use App\Models\Connection;
 use App\Models\User;
 use App\Models\Product;
+use App\Models\Message;
+use App\Models\EventSubscription;
+
+use App\Models\Conversation;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -18,7 +23,14 @@ class DashboardController extends Controller
         $events = Event::latest()->get();
         $received = Connection::pending()->where('receiver_id', $user->id)->with('sender')->get();
         $sent = Connection::pending()->where('sender_id', $user->id)->with('receiver')->get();
-        return view('dashboard.index', compact('user','events','received','sent'));
+        $connectionsCount = Connection::accepted()
+            ->where(function($q) use ($user) { $q->where('sender_id', $user->id)->orWhere('receiver_id', $user->id); })
+            ->count();
+        $messagesCount = Message::whereHas('conversation.participants', function($q) use ($user) {
+                $q->where('users.id', $user->id);
+            })->count();
+        $eventsCount = $events->count();
+        return view('dashboard.index', compact('user','events','received','sent','connectionsCount','messagesCount','eventsCount'));
     }
     public function network() {
         $user = Auth::user();
@@ -226,5 +238,105 @@ class DashboardController extends Controller
             return response()->json(['ok' => true, 'message' => 'Password updated']);
         }
         return redirect()->route('settings')->with('status', 'Password updated');
+    }
+
+    public function deleteAccount(Request $request)
+    {
+        $user = $request->user();
+        $data = $request->validate([
+            'password' => ['required', 'string'],
+            'agree' => ['accepted'],
+        ]);
+
+        if (!Hash::check($data['password'], $user->password)) {
+            if ($request->expectsJson()) {
+                return response()->json(['ok' => false, 'message' => 'Password is incorrect'], 422);
+            }
+            return back()->withErrors(['password' => 'Password is incorrect'])->withInput();
+        }
+
+        DB::transaction(function () use ($user) {
+            // Messages authored by the user
+            Message::where('sender_id', $user->id)->forceDelete();
+
+            // Detach user from conversations and remove empty conversations
+            DB::table('conversation_user')->where('user_id', $user->id)->delete();
+            Conversation::whereDoesntHave('participants')->delete();
+
+            // Connections
+            Connection::where('sender_id', $user->id)->orWhere('receiver_id', $user->id)->delete();
+
+            // Event subscriptions
+            EventSubscription::where('user_id', $user->id)->delete();
+
+            // Products created by user (images cascade via FK)
+            Product::where('created_by', $user->id)->delete();
+
+            // Events organized by user (soft delete)
+            Event::where('organizer_id', $user->id)->delete();
+
+            // Sessions
+            DB::table('sessions')->where('user_id', $user->id)->delete();
+
+            // Finally, delete the user
+            $user->delete();
+        });
+
+        Auth::logout();
+        $request->session()->invalidate();
+        $request->session()->regenerateToken();
+
+        if ($request->expectsJson()) {
+            return response()->json(['ok' => true, 'message' => 'Account deleted', 'redirect' => route('login')]);
+        }
+        return redirect()->route('login');
+    }
+
+    public function notificationsNetwork(Request $request)
+    {
+        $user = Auth::user();
+        $received = Connection::pending()
+            ->where('receiver_id', $user->id)
+            ->with('sender')
+            ->orderBy('created_at', 'desc')
+            ->limit(10)
+            ->get()
+            ->map(function ($c) {
+                return [
+                    'id' => $c->id,
+                    'created_at' => optional($c->created_at)->toIso8601String(),
+                    'sender_id' => $c->sender_id,
+                    'sender_name' => optional($c->sender)->full_name,
+                    'sender_uuid' => optional($c->sender)->uuid,
+                    'sender_image' => optional($c->sender)->image,
+                ];
+            });
+
+        $sent = Connection::pending()
+            ->where('sender_id', $user->id)
+            ->with('receiver')
+            ->orderBy('created_at', 'desc')
+            ->limit(10)
+            ->get()
+            ->map(function ($c) {
+                return [
+                    'id' => $c->id,
+                    'created_at' => optional($c->created_at)->toIso8601String(),
+                    'receiver_id' => $c->receiver_id,
+                    'receiver_name' => optional($c->receiver)->full_name,
+                    'receiver_uuid' => optional($c->receiver)->uuid,
+                    'receiver_image' => optional($c->receiver)->image,
+                ];
+            });
+
+        return response()->json([
+            'ok' => true,
+            'received' => $received,
+            'sent' => $sent,
+            'counts' => [
+                'incoming' => $received->count(),
+                'sent' => $sent->count(),
+            ],
+        ]);
     }
 }

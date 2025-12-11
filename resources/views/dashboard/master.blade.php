@@ -50,7 +50,7 @@
 
       <div class="sidebar__bottom">
         <div class="sidebar__secondary">
-          <a href="{{ route('message') }}" class="nav-item">
+          <a href="{{ route('message') }}" class="nav-item {{ request()->is('message') ? 'active' : '' }}">
           <svg width="20" height="20" stroke="currentColor" fill="currentColor" stroke-width="0" viewBox="0 0 256 256" class="h-5 w-5" height="1em" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M116,120a12,12,0,1,1,12,12A12,12,0,0,1,116,120ZM84,132a12,12,0,1,0-12-12A12,12,0,0,0,84,132Zm88,0a12,12,0,1,0-12-12A12,12,0,0,0,172,132Zm60-76V184a16,16,0,0,1-16,16H155.57l-13.68,23.94a16,16,0,0,1-27.78,0L100.43,200H40a16,16,0,0,1-16-16V56A16,16,0,0,1,40,40H216A16,16,0,0,1,232,56Zm-16,0H40V184h65.07a8,8,0,0,1,7,4l16,28,16-28a8,8,0,0,1,7-4H216Z"></path></svg>
             <span class="nav-label">Messages</span>
           </a>
@@ -58,7 +58,7 @@
            <svg width="20" height="20" stroke="currentColor" fill="currentColor" stroke-width="0" viewBox="0 0 512 512" class="h-5 w-5" height="1em" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M255.9 456c31.1 0 48.1-22 48.1-53h-96.3c0 31 17 53 48.2 53zM412 352.2c-15.4-20.3-45.7-32.2-45.7-123.1 0-93.3-41.2-130.8-79.6-139.8-3.6-.9-6.2-2.1-6.2-5.9v-2.9c0-13.4-11-24.7-24.4-24.6-13.4-.2-24.4 11.2-24.4 24.6v2.9c0 3.7-2.6 5-6.2 5.9-38.5 9.1-79.6 46.5-79.6 139.8 0 90.9-30.3 102.7-45.7 123.1-9.9 13.1-.5 31.8 15.9 31.8h280.1c16.3 0 25.7-18.8 15.8-31.8z"></path></svg>
             <span class="nav-label">Notifications</span>
           </a>
-          <a href="/settings" class="nav-item">
+          <a href="/settings" class="nav-item {{ request()->is('settings') ? 'active' : '' }}">
            <svg width="20" height="20" stroke="currentColor" fill="currentColor" stroke-width="0" viewBox="0 0 512 512" class="h-5 w-5" height="1em" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M413.967 276.8c1.06-6.235 1.06-13.518 1.06-20.8s-1.06-13.518-1.06-20.8l44.667-34.318c4.26-3.118 5.319-8.317 2.13-13.518L418.215 115.6c-2.129-4.164-8.507-6.235-12.767-4.164l-53.186 20.801c-10.638-8.318-23.394-15.601-36.16-20.801l-7.448-55.117c-1.06-4.154-5.319-8.318-10.638-8.318h-85.098c-5.318 0-9.577 4.164-10.637 8.318l-8.508 55.117c-12.767 5.2-24.464 12.482-36.171 20.801l-53.186-20.801c-5.319-2.071-10.638 0-12.767 4.164L49.1 187.365c-2.119 4.153-1.061 10.399 2.129 13.518L96.97 235.2c0 7.282-1.06 13.518-1.06 20.8s1.06 13.518 1.06 20.8l-44.668 34.318c-4.26 3.118-5.318 8.317-2.13 13.518L92.721 396.4c2.13 4.164 8.508 6.235 12.767 4.164l53.187-20.801c10.637 8.318 23.394 15.601 36.16 20.801l8.508 55.117c1.069 5.2 5.318 8.318 10.637 8.318h85.098c5.319 0 9.578-4.164 10.638-8.318l8.518-55.117c12.757-5.2 24.464-12.482 36.16-20.801l53.187 20.801c5.318 2.071 10.637 0 12.767-4.164l42.549-71.765c2.129-4.153 1.06-10.399-2.13-13.518l-46.8-34.317zm-158.499 52c-41.489 0-74.46-32.235-74.46-72.8s32.971-72.8 74.46-72.8 74.461 32.235 74.461 72.8-32.972 72.8-74.461 72.8z"></path></svg>
             <span class="nav-label">Settings</span>
           </a>
@@ -120,6 +120,17 @@
             </svg>
             <span class="notification-badge"></span>
           </button>
+          <div class="notification-dropdown" id="notificationDropdown">
+            <div class="notif-header">Network Notifications</div>
+            <div class="notif-section">
+              <div class="notif-title">Incoming Requests</div>
+              <div class="notif-list" id="notifIncoming"></div>
+            </div>
+            <div class="notif-section">
+              <div class="notif-title">Sent Requests</div>
+              <div class="notif-list" id="notifSent"></div>
+            </div>
+          </div>
 
           <div class="user-menu" id="userMenu">
             @php $imgUrl = $user->image ?: null; @endphp
@@ -135,8 +146,8 @@
               <polyline points="6 9 12 15 18 9" />
             </svg>
             <div class="user-dropdown" id="userDropdown">
-              <a href="#">My Profile</a>
-              <a href="#">My Settings</a>
+              <a href="/settings">My Profile</a>
+              <a href="/settings">My Settings</a>
               <a href="#" class="logout">Logout</a>
             </div>
           </div>
@@ -201,6 +212,7 @@
     const userDropdown = document.getElementById('userDropdown');
     const searchBtn = document.querySelector('.search-btn');
     const searchPopover = document.getElementById('searchPopover');
+    const csrf = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
     if (userMenu && userDropdown) {
       userMenu.addEventListener('click', (e) => {
         userDropdown.classList.toggle('open');
@@ -233,6 +245,143 @@
           searchPopover.classList.remove('open');
         }
       });
+    }
+
+    // Notifications dropdown
+    const notificationBtn = document.querySelector('.notification-btn');
+    const notificationDropdown = document.getElementById('notificationDropdown');
+    const notificationBadge = document.querySelector('.notification-badge');
+    let notifLoaded = false;
+    let notifLoading = false;
+
+    function setBadge(visible) {
+      if (notificationBadge) {
+        notificationBadge.style.display = visible ? 'block' : 'none';
+      }
+    }
+
+    function templateItemIncoming(item) {
+      const initial = (item.sender_name || ' ').trim().substring(0,1).toUpperCase();
+      return (
+        '<div class="notif-item incoming" data-id="'+ item.id +'">'
+          + '<div class="notif-info">'
+            + '<div class="notif-avatar">'+ initial +'</div>'
+            + '<div>'
+              + '<div class="notif-name">'+ (item.sender_name || 'Unknown') +'</div>'
+              + '<div class="notif-meta">Incoming request</div>'
+            + '</div>'
+          + '</div>'
+          + '<div class="notif-actions">'
+            + '<button class="btn btn-primary btn-sm btn-accept" data-id="'+ item.id +'" data-user="'+ item.sender_id +'" data-uuid="'+ (item.sender_uuid||'') +'">Accept</button>'
+            + '<button class="btn btn-outline btn-sm btn-decline" data-id="'+ item.id +'">Decline</button>'
+          + '</div>'
+        + '</div>'
+      );
+    }
+
+    function templateItemSent(item) {
+      const initial = (item.receiver_name || ' ').trim().substring(0,1).toUpperCase();
+      return (
+        '<div class="notif-item sent" data-id="'+ item.id +'">'
+          + '<div class="notif-info">'
+            + '<div class="notif-avatar">'+ initial +'</div>'
+            + '<div>'
+              + '<div class="notif-name">'+ (item.receiver_name || 'Unknown') +'</div>'
+              + '<div class="notif-meta">Pending</div>'
+            + '</div>'
+          + '</div>'
+          + '<div class="notif-actions">'
+            + '<button class="btn btn-outline btn-sm btn-cancel" data-id="'+ item.id +'" data-user="'+ item.receiver_id +'">Cancel</button>'
+          + '</div>'
+        + '</div>'
+      );
+    }
+
+    function renderNotifications(data) {
+      const incomingWrap = document.getElementById('notifIncoming');
+      const sentWrap = document.getElementById('notifSent');
+      if (!incomingWrap || !sentWrap) return;
+      const incoming = Array.isArray(data.received) ? data.received : [];
+      const sent = Array.isArray(data.sent) ? data.sent : [];
+      incomingWrap.innerHTML = incoming.length ? incoming.map(templateItemIncoming).join('') : '<div class="notif-empty">No incoming requests</div>';
+      sentWrap.innerHTML = sent.length ? sent.map(templateItemSent).join('') : '<div class="notif-empty">No sent requests</div>';
+      setBadge((incoming.length + sent.length) > 0);
+    }
+
+    async function loadNotifications() {
+      if (notifLoading) return;
+      notifLoading = true;
+      const incomingWrap = document.getElementById('notifIncoming');
+      const sentWrap = document.getElementById('notifSent');
+      if (incomingWrap) incomingWrap.innerHTML = '<div class="notif-loading">Loading...</div>';
+      if (sentWrap) sentWrap.innerHTML = '';
+      try {
+        const res = await fetch('{{ route('notifications.network') }}', { headers: { 'Accept': 'application/json' } });
+        const json = await res.json();
+        renderNotifications(json || {});
+        notifLoaded = true;
+      } catch (e) {
+        if (incomingWrap) incomingWrap.innerHTML = '<div class="notif-empty">Failed to load</div>';
+      } finally {
+        notifLoading = false;
+      }
+    }
+
+    async function postJson(url, data) {
+      const res = await fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': csrf }, body: JSON.stringify(data || {}) });
+      return res.json();
+    }
+
+    if (notificationBtn && notificationDropdown) {
+      notificationBtn.addEventListener('click', (e) => {
+        notificationDropdown.classList.toggle('open');
+        e.stopPropagation();
+        if (notificationDropdown.classList.contains('open') && !notifLoaded) {
+          loadNotifications();
+        }
+      });
+      document.addEventListener('click', (e) => {
+        if (!e.target.closest('.notification-btn') && !e.target.closest('#notificationDropdown')) {
+          notificationDropdown.classList.remove('open');
+        }
+      });
+      window.addEventListener('resize', () => {
+        if (window.innerWidth > 768) {
+          notificationDropdown.classList.remove('open');
+        }
+      });
+
+      notificationDropdown.addEventListener('click', async (e) => {
+        const acceptBtn = e.target.closest('.btn-accept');
+        const declineBtn = e.target.closest('.btn-decline');
+        const cancelBtn = e.target.closest('.btn-cancel');
+        if (acceptBtn) {
+          const id = acceptBtn.getAttribute('data-id');
+          const userId = acceptBtn.getAttribute('data-user');
+          const userUuid = acceptBtn.getAttribute('data-uuid');
+          acceptBtn.disabled = true;
+          const data = await postJson('{{ route('connections.accept') }}', { connection_id: id });
+          const item = acceptBtn.closest('.notif-item'); if (item) item.remove();
+          // Optionally, update UI elements elsewhere if needed
+        } else if (declineBtn) {
+          const id = declineBtn.getAttribute('data-id');
+          declineBtn.disabled = true;
+          await postJson('{{ route('connections.reject') }}', { connection_id: id });
+          const item = declineBtn.closest('.notif-item'); if (item) item.remove();
+        } else if (cancelBtn) {
+          const id = cancelBtn.getAttribute('data-id');
+          cancelBtn.disabled = true;
+          await postJson('{{ route('connections.cancel') }}', { connection_id: id });
+          const item = cancelBtn.closest('.notif-item'); if (item) item.remove();
+        }
+        // Recompute badge after any action
+        const incomingCount = notificationDropdown.querySelectorAll('.notif-item.incoming').length;
+        const sentCount = notificationDropdown.querySelectorAll('.notif-item.sent').length;
+        setBadge((incomingCount + sentCount) > 0);
+      });
+
+      // Prefetch once to show badge state
+      loadNotifications();
     }
 
     const logoutForm = document.getElementById('logout-form');

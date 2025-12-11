@@ -26,6 +26,8 @@ Route::get('/marketplace/{product}', [DashboardController::class, 'productShow']
 Route::get('/settings', [DashboardController::class, 'settings'])->middleware(['auth', 'verified'])->name('settings');
 Route::post('/settings/update', [DashboardController::class, 'updateSettings'])->middleware(['auth', 'verified'])->name('settings.update');
 Route::post('/settings/password', [DashboardController::class, 'updatePassword'])->middleware(['auth', 'verified'])->name('settings.password');
+Route::post('/settings/delete', [DashboardController::class, 'deleteAccount'])->middleware(['auth', 'verified'])->name('settings.delete');
+Route::get('/notifications/network', [DashboardController::class, 'notificationsNetwork'])->middleware(['auth', 'verified'])->name('notifications.network');
 
 
 Route::post('/broadcasting/auth', [BroadcastController::class, 'authenticate'])->middleware(['web','auth']);

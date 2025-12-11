@@ -17,7 +17,7 @@ Settings
         </svg>
       </div>
       <div class="absolute left-40 top-1/2 -translate-y-1/2 flex flex-col gap-2">
-        <div id="heroName" class="text-white text-2xl font-bold">Good Morning, {{ $user->full_name }}</div>
+        <div id="heroName" class="text-white text-2xl font-bold">Hi, {{ $user->full_name }}</div>
         <p class="text-white/90 text-base">Navigate through your user profile</p>
       </div>
     </div>
@@ -27,11 +27,7 @@ Settings
         <div class="bg-white border border-slate-200 rounded-md overflow-hidden shadow-sm">
           <button class="tab w-full text-left flex items-center justify-between px-4 h-11 bg-blue-50 text-blue-600 font-semibold" data-panel="account"><span>Account Information</span></button>
           <button class="tab w-full text-left px-4 h-11 text-slate-700" data-panel="profile"><span>Professional Profile</span></button>
-          <button class="tab w-full text-left px-4 h-11 text-slate-700" data-panel="privacy"><span>Privacy &amp; Display</span></button>
           <button class="tab w-full text-left px-4 h-11 text-slate-700" data-panel="notifications"><span>Notifications</span></button>
-          <button class="tab w-full text-left px-4 h-11 text-slate-700" data-panel="communications"><span>Communications</span></button>
-          <button class="tab w-full text-left px-4 h-11 text-slate-700" data-panel="security"><span>Security</span></button>
-          <button class="tab w-full text-left px-4 h-11 text-slate-700" data-panel="billing"><span>Billings</span></button>
           <button class="tab w-full text-left px-4 h-11 text-red-600" data-panel="delete"><span>Delete Account</span></button>
         </div>
       </aside>
@@ -75,7 +71,7 @@ Settings
             </div>
           </form>
 
-          <form method="POST" action="{{ route('settings.password') }}" id="formPassword" class="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm space-y-4">
+          <form method="POST" action="{{ route('settings.password') }}" id="formPassword" class="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm space-y-4 lg:mt-2">
             @csrf
             <div class="grid grid-cols-1 md:grid-cols-[220px,1fr] gap-4 items-center">
               <label class="text-xs text-slate-600">Old Password</label>
@@ -93,6 +89,27 @@ Settings
               <button type="submit" class="inline-flex items-center rounded-lg bg-blue-600 text-white px-4 py-2 shadow-sm hover:bg-blue-700">Save changes</button>
             </div>
           </form>
+        </div>
+
+        <div id="panel-profile" style="display:none;">
+          <div class="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm space-y-4">
+            <div class="grid grid-cols-1 md:grid-cols-[220px,1fr] gap-4 items-center">
+              <label class="text-xs text-slate-600">SPECIALIZATION</label>
+              <input type="text" value="{{ $user->specialisation ?? '—' }}" disabled class="w-full rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-slate-700" />
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-[220px,1fr] gap-4 items-center">
+              <label class="text-xs text-slate-600">CATEGORY</label>
+              <input type="text" value="{{ $user->category ?? '—' }}" disabled class="w-full rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-slate-700" />
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-[220px,1fr] gap-4 items-center">
+              <label class="text-xs text-slate-600">INSTITUTION</label>
+              <input type="text" value="{{ $user->institution ?? '—' }}" disabled class="w-full rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-slate-700" />
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-[220px,1fr] gap-4 items-center">
+              <label class="text-xs text-slate-600">LICENSE NUMBER</label>
+              <input type="text" value="{{ $user->license_number ?? '—' }}" disabled class="w-full rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-slate-700" />
+            </div>
+          </div>
         </div>
 
         <div id="panel-notifications" style="display:none;">
@@ -133,6 +150,36 @@ Settings
             </div>
           </div>
         </div>
+
+        <div id="panel-delete" style="display:none;">
+          <form method="POST" action="{{ route('settings.delete') }}" id="formDelete" class="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm space-y-4">
+            @csrf
+            <div class="flex items-start gap-3">
+              <div class="w-10 h-10 rounded-full bg-red-100 text-red-600 flex items-center justify-center">
+                <svg viewBox="0 0 24 24" class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 9v4"/><path d="M12 17h.01"/><path d="M21 21L3 3"/><path d="M12 2a10 10 0 1 0 10 10"/></svg>
+              </div>
+              <div class="flex-1">
+                <div class="text-lg font-semibold text-red-600">Delete Account</div>
+                <p class="text-sm text-slate-700">You are about to perform a critical action. Deleting your account will permanently remove all your data, including connections, messages, products, and event registrations.</p>
+              </div>
+            </div>
+            <div class="h-px bg-slate-200"></div>
+            <div class="grid grid-cols-1 md:grid-cols-[220px,1fr] gap-4 items-center">
+              <label class="text-xs text-slate-600">Confirm with Password</label>
+              <input type="password" name="password" placeholder="Enter your password" class="w-full rounded-lg border border-slate-200 px-3 py-2 text-slate-900 focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500" />
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-[220px,1fr] gap-4 items-start">
+              <label class="text-xs text-slate-600">Agreement</label>
+              <label class="flex items-start gap-2 text-sm text-slate-700">
+                <input type="checkbox" name="agree" id="agreeDelete" class="rounded border-slate-300 text-red-600 focus:ring-red-500" />
+                <span>I understand that deleting my account will remove all information related to me and cannot be undone.</span>
+              </label>
+            </div>
+            <div class="flex justify-start gap-3">
+              <button type="submit" id="btnDeleteAccount" class="inline-flex items-center rounded-lg bg-red-600 text-white px-4 py-2 shadow-sm hover:bg-red-700 disabled:opacity-60">Delete Account</button>
+            </div>
+          </form>
+        </div>
       </section>
     </div>
   </div>
@@ -141,7 +188,7 @@ Settings
     (function(){
       const csrf = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
       const tabs = Array.from(document.querySelectorAll('#settingsTabs .tab'));
-      const panels = { account: document.getElementById('panel-account'), notifications: document.getElementById('panel-notifications') };
+      const panels = { account: document.getElementById('panel-account'), profile: document.getElementById('panel-profile'), notifications: document.getElementById('panel-notifications'), delete: document.getElementById('panel-delete') };
       function setTabClasses(el, active){
         el.classList.toggle('bg-blue-50', active);
         el.classList.toggle('text-blue-600', active);
@@ -183,8 +230,8 @@ Settings
           const res = await fetch(formAccount.action, { method: 'POST', headers: { 'X-CSRF-TOKEN': csrf, 'Accept': 'application/json' }, body: fd });
           const data = await res.json();
           if (res.ok && data && data.ok) {
-            if (data.user && data.user.full_name) heroName.textContent = 'Good Morning, '+data.user.full_name;
-            showToast('Profile updated');
+            if (data.user && data.user.full_name) heroName.textContent = 'Hi, '+data.user.full_name;
+            showToast('Profile Updated Successfully!');
           } else {
             const msg = (data && (data.message || (data.errors && Object.values(data.errors)[0][0]))) || 'Update failed';
             showToast(msg, false);
@@ -231,6 +278,34 @@ Settings
           }
         } catch(err) { showToast('Network error', false); }
       });
+
+      const formDelete = document.getElementById('formDelete');
+      const btnDelete = document.getElementById('btnDeleteAccount');
+      if (formDelete) {
+        formDelete.addEventListener('submit', async (e)=>{
+          e.preventDefault();
+          const pwd = formDelete.querySelector('input[name="password"]').value.trim();
+          const agree = formDelete.querySelector('#agreeDelete').checked;
+          if (!pwd) { showToast('Please enter your password', false); return; }
+          if (!agree) { showToast('Please confirm the agreement checkbox', false); return; }
+          btnDelete.disabled = true;
+          try {
+            const res = await fetch(formDelete.action, { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': csrf, 'Accept': 'application/json' }, body: JSON.stringify({ password: pwd, agree: true }) });
+            const data = await res.json();
+            if (res.ok && data && data.ok) {
+              showToast('Account deleted');
+              setTimeout(()=>{ window.location.href = data.redirect || '{{ route('login') }}'; }, 800);
+            } else {
+              const msg = (data && (data.message || (data.errors && Object.values(data.errors)[0][0]))) || 'Deletion failed';
+              showToast(msg, false);
+            }
+          } catch(err) {
+            showToast('Network error', false);
+          } finally {
+            btnDelete.disabled = false;
+          }
+        });
+      }
     })();
   </script>
 @endsection

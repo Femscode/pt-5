@@ -14,7 +14,7 @@
     <section class="stats-grid">
         <div class="stat-card">
             <div class="frame">
-                <div class="text-wrapper">20</div>
+                <div class="text-wrapper">{{ $messagesCount ?? 0 }}</div>
                 <div class="div">Messages</div>
             </div>
             <div class="icon-message-outline-wrapper">
@@ -26,7 +26,7 @@
 
         <div class="stat-card">
             <div class="frame">
-                <div class="text-wrapper">11</div>
+                <div class="text-wrapper">{{ $connectionsCount ?? 0 }}</div>
                 <div class="div">Network</div>
             </div>
             <div class="icon-network-outline-wrapper">
@@ -39,7 +39,7 @@
 
         <div class="stat-card">
             <div class="frame">
-                <div class="text-wrapper">15</div>
+                <div class="text-wrapper">{{ $eventsCount ?? 0 }}</div>
                 <div class="div">Event</div>
             </div>
             <div class="icon-calendar-outline-wrapper">
