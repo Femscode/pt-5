@@ -1,5 +1,5 @@
 <x-guest-layout>
-    <h1 class="login-heading">Join Our Community</h1>
+    <h1 style="font-size:2.23em;font-weight:600;color:black;font-family:'DM sans', sans-serif;" class="login-heading">Join Our Community</h1>
     <p class="text-gray-500 mb-4">Create your professional healthcare account</p>
     <form method="POST" action="{{ route('register') }}" class="login-form" id="registerForm">
         @csrf

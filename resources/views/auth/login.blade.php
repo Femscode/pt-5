@@ -1,8 +1,8 @@
 <x-guest-layout>
     <x-auth-session-status class="mb-4" :status="session('status')" />
 
-    <h1 class="login-heading">Sign In</h1>
-
+    <h1 style="font-size:2.23em;font-weight:600;color:black;font-family:'DM sans', sans-serif;" class="login-heading">Welcome Back!</h1>
+  <!-- <p>Not registered? <a href="{{ route('register') }}">Register Now</a></p> -->
     <form method="POST" action="{{ route('login') }}" class="login-form">
         @csrf
 
