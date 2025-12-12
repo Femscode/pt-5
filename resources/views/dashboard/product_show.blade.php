@@ -39,7 +39,7 @@ Marketplace
 
       <div class="info-col">
         <h2 class="title">{{ $product->name }}</h2>
-        <div class="price">@if(strtolower($product->product_type) === 'donation') Free @else ${{ number_format((float)$product->price, 2) }} @endif</div>
+        <div class="price">@if(strtolower($product->product_type) === 'donation') Free @else €{{ number_format((float)$product->price, 2) }} @endif</div>
         <div class="meta">
           @if(!empty($product->manufacturer))<div class="meta-item">Manufacturer: <span>{{ $product->manufacturer }}</span></div>@endif
           @if(!empty($product->model_number))<div class="meta-item">Model: <span>{{ $product->model_number }}</span></div>@endif
