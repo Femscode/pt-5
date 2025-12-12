@@ -8,7 +8,7 @@ Settings
 @endsection
 
 @section('content')
-  <div class="p-6">
+  <div class="p-1">
     <div class="relative w-full max-w-5xl h-44 bg-gradient-to-r from-blue-700 to-indigo-600 border border-slate-200 rounded-xl shadow-md overflow-hidden mb-6">
       <img class="absolute -top-40 -left-40 w-[1440px] h-[1024px] opacity-20 pointer-events-none select-none" src="{{ url('assets/images/grid-layers-v2.png') }}" alt="" />
       <div class="absolute left-6 top-1/2 -translate-y-1/2 w-26 h-26 rounded-full bg-white/20 flex items-center justify-center">

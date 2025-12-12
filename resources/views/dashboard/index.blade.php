@@ -144,25 +144,25 @@
             <div class="event-card">
                 <div id="eventList"></div>
                 <div class="event-footer"></div>
-            </div>
         </div>
+      </div>
     </section>
+    @php
+      $calendarEvents = [];
+      foreach (($events ?? []) as $e) {
+          if (!empty($e->start_date)) {
+              $calendarEvents[] = [
+                  'date' => \Carbon\Carbon::parse($e->start_date)->format('Y-m-d'),
+                  'title' => $e->title,
+                  'cta' => 'View',
+                  'link' => route('event.show', $e),
+              ];
+          }
+      }
+    @endphp
     <script>
     (function() {
       const monthNames = ['January','February','March','April','May','June','July','August','September','October','November','December'];
-      @php
-        $calendarEvents = [];
-        foreach (($events ?? []) as $e) {
-            if (!empty($e->start_date)) {
-                $calendarEvents[] = [
-                    'date' => \Carbon\Carbon::parse($e->start_date)->format('Y-m-d'),
-                    'title' => $e->title,
-                    'cta' => !empty($e->event_link) ? 'Join' : 'View',
-                    'link' => $e->event_link,
-                ];
-            }
-        }
-      @endphp
       const events = @json($calendarEvents);
       const now = new Date();
       let currentYear = now.getFullYear();
@@ -216,9 +216,10 @@
           content.appendChild(p);
           const cta = document.createElement('div');
           cta.className = 'event-cta';
-          const ctaText = document.createElement('div');
+          const ctaText = document.createElement('a');
           ctaText.className = 'text-wrapper-3';
           ctaText.textContent = e.cta || 'View';
+          ctaText.href = e.link || '#';
           cta.appendChild(ctaText);
           wrap.appendChild(badge);
           wrap.appendChild(content);
@@ -265,9 +266,10 @@
           content.appendChild(p);
           const cta = document.createElement('div');
           cta.className = 'event-cta';
-          const ctaText = document.createElement('div');
+          const ctaText = document.createElement('a');
           ctaText.className = 'text-wrapper-3';
           ctaText.textContent = e.cta || 'View';
+          ctaText.href = e.link || '#';
           cta.appendChild(ctaText);
           wrap.appendChild(badge);
           wrap.appendChild(content);
