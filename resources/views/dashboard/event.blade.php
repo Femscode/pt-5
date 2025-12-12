@@ -22,51 +22,62 @@ Events
         </svg>
         <input id="searchInput" type="text" placeholder="Search events..." />
       </div>
-      <div class="filters">
-        <select id="filterDate" class="filter">
-          <option value="">Date</option>
-          <option value="">Any</option>
-          @php
-            $monthLabels = [];
-            foreach (($events ?? []) as $ev) {
-              if (!empty($ev->start_date)) {
-                $dt = new \DateTime($ev->start_date);
-                $code = $dt->format('Y-m');
-                $monthLabels[$code] = $dt->format('F Y');
+      <button class="filter-btn">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="icon">
+          <path d="M3 6h18M6 12h12M10 18h4" />
+        </svg>
+        Filter
+      </button>
+      <div class="filter-popover" id="filterPopover">
+        <div class="filters">
+          <select id="filterDate" class="filter">
+            <option value="">Date</option>
+            <option value="">Any</option>
+            @php
+              $monthLabels = [];
+              foreach (($events ?? []) as $ev) {
+                if (!empty($ev->start_date)) {
+                  $dt = new \DateTime($ev->start_date);
+                  $code = $dt->format('Y-m');
+                  $monthLabels[$code] = $dt->format('F Y');
+                }
               }
-            }
-          @endphp
-          @foreach($monthLabels as $code => $label)
-            <option value="{{ $code }}">{{ $label }}</option>
-          @endforeach
-        </select>
-        <select id="filterLocation" class="filter">
-          <option value="">Location</option>
-          <option value="">Any</option>
-          @php
-            $locs = [];
-            foreach (($events ?? []) as $ev) {
-              $loc = trim(($ev->state ? $ev->state.', ' : '').($ev->country ?? ''));
-              if ($loc) { $locs[$loc] = $loc; }
-            }
-          @endphp
-          @foreach($locs as $loc)
-            <option value="{{ $loc }}">{{ $loc }}</option>
-          @endforeach
-        </select>
-        <select id="filterType" class="filter">
-          <option value="">Event Type</option>
-          <option value="">Any</option>
-          @php
-            $cats = [];
-            foreach (($events ?? []) as $ev) {
-              if (!empty($ev->category)) { $cats[$ev->category] = $ev->category; }
-            }
-          @endphp
-          @foreach($cats as $c)
-            <option value="{{ $c }}">{{ $c }}</option>
-          @endforeach
-        </select>
+            @endphp
+            @foreach($monthLabels as $code => $label)
+              <option value="{{ $code }}">{{ $label }}</option>
+            @endforeach
+          </select>
+          <select id="filterLocation" class="filter">
+            <option value="">Location</option>
+            <option value="">Any</option>
+            @php
+              $locs = [];
+              foreach (($events ?? []) as $ev) {
+                $loc = trim(($ev->state ? $ev->state.', ' : '').($ev->country ?? ''));
+                if ($loc) { $locs[$loc] = $loc; }
+              }
+            @endphp
+            @foreach($locs as $loc)
+              <option value="{{ $loc }}">{{ $loc }}</option>
+            @endforeach
+          </select>
+          <select id="filterType" class="filter">
+            <option value="">Event Type</option>
+            <option value="">Any</option>
+            @php
+              $cats = [];
+              foreach (($events ?? []) as $ev) {
+                if (!empty($ev->category)) { $cats[$ev->category] = $ev->category; }
+              }
+            @endphp
+            @foreach($cats as $c)
+              <option value="{{ $c }}">{{ $c }}</option>
+            @endforeach
+          </select>
+        </div>
+        <div class="filter-actions">
+          <button type="button" class="btn btn-outline btn-sm" id="filterClear">Clear</button>
+        </div>
       </div>
     </div>
 
@@ -79,7 +90,7 @@ Events
         <div class="event-card" data-title="{{ strtolower($e->title ?? '') }}" data-category="{{ strtolower($e->category ?? '') }}" data-country="{{ strtolower($e->country ?? '') }}" data-state="{{ strtolower($e->state ?? '') }}" data-location="{{ strtolower($locText) }}" data-mode="{{ $e->is_online ? 'online' : 'in-person' }}" data-month="{{ $monthCode }}" data-subscribed="{{ in_array($e->id, ($subscribedIds ?? [])) ? '1' : '0' }}" data-id="{{ $e->id }}">
           <div class="card-media-wrap">
             @if(!empty($e->image_url))
-              <img class="card-media" src="{{ $e->image_url }}" alt="{{ $e->title }}">
+              <img class="card-media" src="https://admin.mybridgeinternational.org/mbi-admin-files/public/{{ $e->image_url }}" alt="{{ $e->title }}">
             @else
               <div class="card-media placeholder"></div>
             @endif
@@ -187,6 +198,12 @@ Events
       filterDate.addEventListener('change', applyFilters);
       filterLocation.addEventListener('change', applyFilters);
       filterType.addEventListener('change', applyFilters);
+      const filterBtn = document.querySelector('.filter-btn');
+      const filterPopover = document.getElementById('filterPopover');
+      const filterClear = document.getElementById('filterClear');
+      filterBtn.addEventListener('click', ()=>{ filterPopover.classList.toggle('open'); });
+      document.addEventListener('click', (e)=>{ const withinBtn = e.target.closest('.filter-btn'); if (!withinBtn && !filterPopover.contains(e.target)) { filterPopover.classList.remove('open'); } });
+      if (filterClear) { filterClear.addEventListener('click', ()=>{ filterDate.value=''; filterLocation.value=''; filterType.value=''; applyFilters(); filterPopover.classList.remove('open'); }); }
       
       tabs.forEach(tab => {
         tab.addEventListener('click', () => {

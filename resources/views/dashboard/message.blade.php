@@ -69,68 +69,13 @@ Messages
     return !!(echo && echo.connector && echo.connector.pusher && echo.connector.pusher.connection && echo.connector.pusher.connection.state === 'connected');
   }
   function initEcho(){
-    const authUrl = '/broadcasting/auth';
-    echo = new Echo({
-      broadcaster: 'pusher',
-      key: '{{ env('PUSHER_APP_KEY') }}',
-      cluster: '{{ env('PUSHER_APP_CLUSTER') }}',
-      forceTLS: {{ env('PUSHER_USETLS', true) ? 'true' : 'false' }},
-      authEndpoint: authUrl,
-      auth: { headers: { 'X-CSRF-TOKEN': csrf, 'X-Requested-With': 'XMLHttpRequest' }, withCredentials: true },
-    });
-    if (echo && echo.connector && echo.connector.pusher && echo.connector.pusher.connection) {
-      echo.connector.pusher.connection.bind('state_change', (st)=>{
-        console.log('Pusher state change', st);
-        ensureRealtime();
-      });
-      echo.connector.pusher.connection.bind('error', (err)=>{
-        console.error('Pusher connection error', err);
-        ensureRealtime();
-      });
-      echo.connector.pusher.connection.bind('connected', ()=>{
-        console.log('Pusher connected');
-        document.querySelectorAll('.inbox-item').forEach(btn=>{ subscribeConversation(btn.dataset.uuid); });
-        ensureRealtime();
-      });
-    }
-    echo.private('inbox.{{ $user->uuid ?? '' }}').listen('.inbox.updated', (e)=>{
-      const item = e.item;
-      const btn = document.querySelector('.inbox-item[data-uuid="'+item.conversationUuid+'"]');
-      if (btn) {
-        const preview = btn.querySelector('.preview');
-        if (preview && item.lastMessage && item.lastMessage.content) preview.textContent = item.lastMessage.content;
-      }
-    });
+    echo = null;
   }
   function subscribeConversation(uuid){
-    if (!echo) initEcho();
-    console.log('Subscribing to conversation', uuid);
-    if (subscribedConversations.has(uuid)) {
-      // already subscribed; still attach listeners to ensure handlers exist
-    } else {
-      subscribedConversations.add(uuid);
-    }
-    echo.private('conversation.'+uuid)
-      .listen('.message.sent', (e)=>{
-        if (activeConv && activeConv.uuid === uuid) {
-          appendMessage(e.message);
-        } else {
-          const btn = document.querySelector('.inbox-item[data-uuid="'+uuid+'"]');
-          if (btn) {
-            const preview = btn.querySelector('.preview');
-            if (preview && e.message && e.message.content) preview.textContent = e.message.content;
-          }
-        }
-      })
-      .listen('.message.deleted', (e)=>{ const el = document.querySelector('[data-msg="'+e.messageUuid+'"]'); if (el) el.remove(); })
-      .listen('.message.read', (e)=>{ /* optional read receipts UI */ });
+    return;
   }
 
   function ensureRealtime(){
-    if (isConnected()) {
-      if (pollTimer) { clearInterval(pollTimer); pollTimer = null; }
-      return;
-    }
     if (activeConv && !pollTimer) {
       pollTimer = setInterval(async ()=>{
         try {
@@ -145,6 +90,25 @@ Messages
           console.error('Polling error', e);
         }
       }, 3000);
+    }
+  }
+
+  let inboxPollTimer = null;
+  function startInboxPolling(){
+    if (!inboxPollTimer) {
+      inboxPollTimer = setInterval(async ()=>{
+        try {
+          const res = await fetch('{{ route('conversations.inbox') }}');
+          const data = await res.json();
+          (data.items||[]).forEach((item)=>{
+            const btn = document.querySelector('.inbox-item[data-uuid="'+item.conversationUuid+'"]');
+            if (btn) {
+              const preview = btn.querySelector('.preview');
+              if (preview && item.lastMessage && item.lastMessage.content) preview.textContent = item.lastMessage.content;
+            }
+          });
+        } catch (e) {}
+      }, 4000);
     }
   }
 
@@ -223,12 +187,12 @@ Messages
 
   initEcho();
   // Proactively subscribe to all conversations in inbox so previews update without clicks
-  document.querySelectorAll('.inbox-item').forEach(btn=>{ subscribeConversation(btn.dataset.uuid); });
+  document.querySelectorAll('.inbox-item').forEach(()=>{});
   ensureRealtime();
+  startInboxPolling();
   const initialUuid = new URLSearchParams(window.location.search).get('conversationUuid');
   if (initialUuid) {
     activeConv = { id: null, uuid: initialUuid, type: 'direct' };
-    subscribeConversation(initialUuid);
     loadConversation(initialUuid);
     const btn = document.querySelector('.inbox-item[data-uuid="'+initialUuid+'"]');
     if (btn) { document.querySelectorAll('.inbox-item').forEach(b=>b.classList.remove('active')); btn.classList.add('active'); }

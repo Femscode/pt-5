@@ -12,7 +12,7 @@ Events
     <div class="event-card">
       <div class="media-wrap">
         @if(!empty($event->image_url))
-          <img class="media" src="{{ $event->image_url }}" alt="{{ $event->title }}">
+          <img class="media" src="https://admin.mybridgeinternational.org/mbi-admin-files/public/{{ $event->image_url }}" alt="{{ $event->title }}">
         @else
           <div class="media placeholder"></div>
         @endif

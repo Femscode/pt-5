@@ -23,7 +23,7 @@ Marketplace
         <div class="main-media">
           @php $first = ($gallery ?? []); $first = count($first) ? $first[0] : null; @endphp
           @if($first)
-            <img id="mainImage" src="{{ $first }}" alt="{{ $product->name }}">
+            <img id="mainImage" src="https://admin.mybridgeinternational.org/mbi-admin-files/public/{{ $first }}" alt="{{ $product->name }}">
           @else
             <div class="media placeholder"></div>
           @endif
@@ -31,7 +31,7 @@ Marketplace
         @if(($gallery ?? []) && count($gallery))
           <div class="thumbs" id="thumbs">
             @foreach($gallery as $url)
-              <img class="thumb" src="{{ $url }}" alt="Thumb">
+              <img class="thumb" src="https://admin.mybridgeinternational.org/mbi-admin-files/public/{{ $url }}" alt="Thumb">
             @endforeach
           </div>
         @endif

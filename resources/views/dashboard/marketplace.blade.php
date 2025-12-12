@@ -56,7 +56,7 @@ Marketplace
         <div class="mp-card" data-title="{{ strtolower($p->name ?? '') }}" data-category="{{ strtolower($p->category ?? '') }}" data-location="{{ strtolower($loc) }}" data-type="{{ strtolower($p->product_type ?? '') }}" data-price="{{ $price }}">
           <div class="card-media-wrap">
             @if($thumb)
-              <img class="card-media" src="{{ $thumb }}" alt="{{ $p->name }}">
+              <img class="card-media" src="https://admin.mybridgeinternational.org/mbi-admin-files/public/{{ $thumb }}" alt="{{ $p->name }}">
             @else
               <div class="card-media placeholder"></div>
             @endif
