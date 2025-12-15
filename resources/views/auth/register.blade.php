@@ -24,6 +24,7 @@
                 <x-input-label for="password_confirmation" :value="__('CONFIRM PASSWORD')" />
                 <x-text-input id="password_confirmation" class="block mt-1 w-full" type="password" name="password_confirmation" required autocomplete="new-password" placeholder="Password" />
                 <x-input-error :messages="$errors->get('password_confirmation')" class="mt-2" />
+                <div id="passMatchHint" style="font-size:12px;margin-top:6px;"></div>
             </div>
             <div class="mt-6">
                 <button type="button" id="reg-next-1" class="login-submit w-full justify-center">Next</button>
@@ -34,14 +35,19 @@
             <div>
                 <x-input-label for="category" :value="__('CATEGORY')" />
                 <select id="category" name="category" class="block mt-1 w-full">
-                    <option value="">Select your category</option>
-                    <option>Clinical and Medical Practice</option>
+                    <option value="">Select a category</option>
+                    <option>Clinical & Medical Practice</option>
+                    <option>Nursing & Midwifery</option>
+                    <option>Therapeutic & Rehabilitation Professionals</option>
                     <option>Allied Health Professionals (AHPs)</option>
+                    <option>Behavioural, Mental Health & Social Care Professionals</option>
+                    <option>Public Health & Community Services</option>
+                    <option>Dental Health Professionals</option>
                     <option>Research, Academia and Education</option>
                     <option>Pharmaceuticals and Life Sciences</option>
                     <option>Healthcare Management & Administration</option>
                     <option>Technology, Engineering & Data</option>
-                    <option>Public Health & Community Services</option>
+                    <option>Manufacturing, Supply & Logistics</option>
                     <option>Corporate, Legal & Finance (Health Sector)</option>
                     <option>Other / Support Roles</option>
                 </select>
@@ -96,6 +102,9 @@
         const s3 = document.getElementById('reg-step-3');
         const n1 = document.getElementById('reg-next-1');
         const n2 = document.getElementById('reg-next-2');
+        const p1 = document.getElementById('password');
+        const p2 = document.getElementById('password_confirmation');
+        const hint = document.getElementById('passMatchHint');
         function show(step){
           s1.style.display = step===1 ? 'block' : 'none';
           s2.style.display = step===2 ? 'block' : 'none';
@@ -104,6 +113,23 @@
         show(1);
         n1.addEventListener('click', function(){ show(2); });
         n2.addEventListener('click', function(){ show(3); });
+        function checkMatch(){
+          if(!p1 || !p2 || !hint) return;
+          const a = p1.value;
+          const b = p2.value;
+          if(!a && !b){ hint.textContent=''; return; }
+          if(a === b){
+            hint.textContent = 'Passwords match';
+            hint.style.color = '#0f766e';
+          } else {
+            hint.textContent = 'Passwords do not match';
+            hint.style.color = '#b91c1c';
+          }
+        }
+        if(p1 && p2){
+          p1.addEventListener('input', checkMatch);
+          p2.addEventListener('input', checkMatch);
+        }
         const form = document.getElementById('registerForm');
         if(form){
           form.addEventListener('submit', function(){
