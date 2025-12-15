@@ -37,10 +37,10 @@ Marketplace
         <select id="filterPrice" class="filter">
           <option value="">Price Range</option>
           <option value="">Any</option>
-          <option value="0-1000">€0 - €1,000</option>
-          <option value="1000-5000">€1,000 - €5,000</option>
-          <option value="5000-10000">€5,000 - €10,000</option>
-          <option value="10000-">€10,000+</option>
+          <option value="0-1000">£0 - £1,000</option>
+          <option value="1000-5000">£1,000 - £5,000</option>
+          <option value="5000-10000">£5,000 - £10,000</option>
+          <option value="10000-">£10,000+</option>
         </select>
       </div>
     </div>
@@ -66,7 +66,7 @@ Marketplace
           </div>
           <div class="card-body">
             <div class="title">{{ $p->name }}</div>
-            <div class="price">@if(strtolower($p->product_type) === 'donation') Free @else €{{ number_format($price, 2) }} @endif</div>
+            <div class="price">@if(strtolower($p->product_type) === 'donation') Free @else £{{ number_format($price, 2) }} @endif</div>
             <ul class="specs">
               @if(!empty($p->manufacturer))
                 <li>{{ $p->manufacturer }}</li>
