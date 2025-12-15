@@ -67,7 +67,7 @@
                         the global healthcare ecosystem.
                     </p>
 
-                    <div class="lp-cta">
+                    <div class="lp-cta2">
                         <a href="{{ route('register') }}"style='padding:25px'  class="btn btn-light">Sign up</a>
                         <a href="{{ route('login') }}" style='padding:25px' class="btn btn-primary">Login</a>
                     </div>
