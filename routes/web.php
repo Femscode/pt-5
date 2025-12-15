@@ -3,6 +3,7 @@
 use App\Http\Controllers\ConversationsController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\MessagesController;
+use App\Http\Controllers\ContactUsController;
 use App\Http\Controllers\ProfileController;
 use Illuminate\Broadcasting\BroadcastController;
 use Illuminate\Support\Facades\Route;
@@ -11,6 +12,8 @@ use Illuminate\Support\Facades\Route;
 Route::get('/', function () {
     return redirect()->route('dashboard');
 });
+Route::view('landing','landing');
+Route::post('/v1/mbicontactus', [ContactUsController::class, 'store'])->name('mbi.contactus');
 
 Route::get('/dashboard', [DashboardController::class, 'index'])->middleware(['auth', 'verified'])->name('dashboard');
 Route::get('/network', [DashboardController::class, 'network'])->middleware(['auth', 'verified'])->name('network');

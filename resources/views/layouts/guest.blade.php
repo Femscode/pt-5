@@ -6,7 +6,7 @@
         <meta name="csrf-token" content="{{ csrf_token() }}">
         <meta name="description" content="MyBridge Admin">
 
-        <title>{{ config('app.name', 'Laravel') }}</title>
+        <title>{{ config('app.name', 'MBI') }}</title>
 
         <!-- Fonts -->
         <link rel="preconnect" href="https://fonts.bunny.net">
@@ -26,7 +26,7 @@
             <div class="min-h-screen grid grid-cols-1 md:grid-cols-2 bg-white">
                 <div class="min-h-screen flex flex-col justify-center px-6 md:px-16">
                     <div class="login-logo mb-6">
-                        <a href="/">
+                        <a href="https://mybridgeinternational.org">
                             <x-application-logo />
                         </a>
                     </div>
