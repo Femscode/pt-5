@@ -12,7 +12,6 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="{{ url('assets/css/dashboard/landing.css') }}">
-    <meta name="csrf-token" content="{{ csrf_token() }}">
 </head>
 
 <body>
@@ -249,22 +248,21 @@
                         <div class="contact-card">
                             <div class="form-field">
                                 <label>NAME</label>
-                                <input id="contactName" class="form-input" type="text" placeholder="Last name first">
+                                <input class="form-input" type="text" placeholder="Last name first">
                             </div>
                             <div class="form-field">
                                 <label>EMAIL</label>
-                                <input id="contactEmail" class="form-input" type="email" placeholder="something@email">
+                                <input class="form-input" type="email" placeholder="something@email">
                             </div>
                             <div class="form-field">
                                 <label>PHONE NUMBER</label>
-                                <input id="contactPhone" class="form-input" type="text" placeholder="0123456789">
+                                <input class="form-input" type="text" placeholder="0123456789">
                             </div>
                             <div class="form-field">
                                 <label>MESSAGE</label>
-                                <textarea id="contactMessage" class="form-textarea" placeholder="Your message here..."></textarea>
+                                <textarea class="form-textarea" placeholder="Your message here..."></textarea>
                             </div>
-                            <div id="contactStatus" style="font-size:14px;color:#4b5563;"></div>
-                            <button id="contactSubmit" class="submit-btn" type="button">Submit</button>
+                            <button class="submit-btn" type="button">Submit</button>
                         </div>
                     </div>
                     <div>
@@ -394,63 +392,6 @@
                 window.addEventListener('resize', function() {
                     if (window.innerWidth > 768) {
                         document.body.classList.remove('menu-open');
-                    }
-                });
-            }
-        })();
-        (function() {
-            const submitBtn = document.getElementById('contactSubmit');
-            const nameEl = document.getElementById('contactName');
-            const emailEl = document.getElementById('contactEmail');
-            const phoneEl = document.getElementById('contactPhone');
-            const messageEl = document.getElementById('contactMessage');
-            const statusEl = document.getElementById('contactStatus');
-            const csrf = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
-
-            function showStatus(text, ok) {
-                if (!statusEl) return;
-                statusEl.textContent = text;
-                statusEl.style.color = ok ? '#0f766e' : '#b91c1c';
-            }
-
-            if (submitBtn) {
-                submitBtn.addEventListener('click', async function() {
-                    const name = nameEl?.value?.trim() || '';
-                    const email = emailEl?.value?.trim() || '';
-                    const phone = phoneEl?.value?.trim() || '';
-                    const message = messageEl?.value?.trim() || '';
-
-                    if (!name || !email || !message) {
-                        showStatus('Please fill in name, email and message', false);
-                        return;
-                    }
-
-                    submitBtn.disabled = true;
-                    showStatus('Submitting...', true);
-                    try {
-                        const res = await fetch('/v1/mbicontactus', {
-                            method: 'POST',
-                            headers: {
-                                'Content-Type': 'application/json',
-                                'X-CSRF-TOKEN': csrf
-                            },
-                            body: JSON.stringify({ name, email, phone, message })
-                        });
-                        const data = await res.json().catch(() => ({}));
-                        if (res.ok && data?.success !== false) {
-                            showStatus('Thanks! We will reach out shortly.', true);
-                            nameEl.value = '';
-                            emailEl.value = '';
-                            phoneEl.value = '';
-                            messageEl.value = '';
-                        } else {
-                            const err = data?.message || 'Submission failed. Please try again.';
-                            showStatus(err, false);
-                        }
-                    } catch (e) {
-                        showStatus('Network error. Please try again.', false);
-                    } finally {
-                        submitBtn.disabled = false;
                     }
                 });
             }
