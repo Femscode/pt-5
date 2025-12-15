@@ -66,6 +66,11 @@
                         providing vital tools, resources, and networking opportunities to keep users informed and connected within
                         the global healthcare ecosystem.
                     </p>
+
+                    <div class="lp-cta">
+                        <a href="{{ route('register') }}"style='padding:25px'  class="btn btn-light">Sign up</a>
+                        <a href="{{ route('login') }}" style='padding:25px' class="btn btn-primary">Login</a>
+                    </div>
                 </div>
                 <div class="hero-media">
                     <div class="shape small">
@@ -281,8 +286,8 @@
                             </div>
                             <div class="info-item">
                                 <div>
-                                        <img src="{{ url('assets/images/landing/call.png') }}" width="50" alt="Phone">
-                               
+                                    <img src="{{ url('assets/images/landing/call.png') }}" width="50" alt="Phone">
+
                                 </div>
                                 <div>
                                     <div class="label">Contact Phone</div>
@@ -434,7 +439,12 @@
                                 'Content-Type': 'application/json',
                                 'X-CSRF-TOKEN': csrf
                             },
-                            body: JSON.stringify({ name, email, phone, message })
+                            body: JSON.stringify({
+                                name,
+                                email,
+                                phone,
+                                message
+                            })
                         });
                         const data = await res.json().catch(() => ({}));
                         if (res.ok && data?.success !== false) {
