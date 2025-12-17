@@ -72,7 +72,6 @@
                     <option>Lab Scientist</option>
                     <option>Radiographer</option>
                     <option>Physiotherapist</option>
-                    <option>Administrator</option>
                 </select>
             </div>
             <div class="mt-4">
