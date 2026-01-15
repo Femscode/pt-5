@@ -1,6 +1,44 @@
 @extends('dashboard.master')
 @section('header')
     <link rel="stylesheet" href="{{ url('assets/css/dashboard/marketplace.css') }}">
+    <style>
+      @media (max-width: 768px) {
+        .mp-page .mp-tabs {
+          overflow-x: auto;
+          padding-bottom: 4px;
+          gap: 6px;
+        }
+        .mp-page .mp-tabs .tab {
+          flex: 0 0 auto;
+          white-space: nowrap;
+          padding: 6px 10px;
+          font-size: 12px;
+        }
+        .mp-toolbar {
+          flex-direction: column;
+          align-items: stretch;
+          gap: 10px;
+        }
+        .mp-toolbar .mp-search {
+          width: 100%;
+        }
+        .mp-toolbar .mp-search input {
+          width: 100%;
+        }
+        .mp-toolbar .filters {
+          width: 100%;
+          display: flex;
+          gap: 8px;
+        }
+        .mp-toolbar .filters .filter {
+          flex: 1;
+        }
+        .mp-toolbar .btn.btn-primary {
+          width: 100%;
+          text-align: center;
+        }
+      }
+    </style>
 @endsection
 
 @section('page_title')
@@ -8,10 +46,17 @@ Marketplace
 @endsection
 
 @section('content')
+  @php
+    $isSeller = $user->category == 'seller';
+  @endphp
   <div class="mp-page">
     <div class="mp-tabs">
       <button class="tab active" data-tab="paid">Paid Products</button>
       <button class="tab" data-tab="donation">Donation Hub</button>
+      @if($isSeller)
+        <button class="tab" data-tab="my-products" data-my-url="{{ route('marketplace.my_products') }}">My Products</button>
+      @endif
+      <button class="tab" data-tab="my-biddings" data-my-bid-url="{{ route('marketplace.my_biddings') }}">My Biddings</button>
     </div>
 
     <div class="mp-toolbar">
@@ -43,6 +88,9 @@ Marketplace
           <option value="10000-">£10,000+</option>
         </select>
       </div>
+      @if($isSeller)
+        <a href="{{ route('marketplace.my_products') }}" class="btn btn-primary">Add Product</a>
+      @endif
     </div>
 
     <div class="mp-grid" id="mpGrid">
@@ -81,12 +129,11 @@ Marketplace
           </div>
           <div class="card-actions">
             @if(strtolower($p->product_type) !== 'donation')
-              <button type="button" class="btn btn-primary buy-btn">Buy Now</button>
+              <button type="button" class="btn btn-primary buy-btn" data-url="{{ $p->url ?? '' }}">Buy Now</button>
             @else
-              <button type="button" class="btn btn-primary buy-btn">Bid</button>
+              <button type="button" class="btn btn-primary bid-btn" data-bid-url="{{ route('marketplace.products.bid', $p) }}">Bid</button>
             @endif
              <a class="btn btn-outline btn-primary" href="{{ route('marketplace.product', $p) }}">See more</a>
-           
           </div>
         </div>
       @empty
@@ -103,6 +150,12 @@ Marketplace
       const filterCategory = document.getElementById('filterCategory');
       const filterPrice = document.getElementById('filterPrice');
       const tabs = Array.from(document.querySelectorAll('.mp-tabs .tab'));
+      const myTab = document.querySelector('.mp-tabs .tab[data-tab="my-products"]');
+      const myProductsUrl = myTab ? myTab.dataset.myUrl || '' : '';
+      const myBidTab = document.querySelector('.mp-tabs .tab[data-tab="my-biddings"]');
+      const myBidsUrl = myBidTab ? myBidTab.dataset.myBidUrl || '' : '';
+      const buyButtons = Array.from(document.querySelectorAll('.buy-btn'));
+      const bidButtons = Array.from(document.querySelectorAll('.bid-btn'));
 
       function inRange(val, range){
         if (!range) return true;
@@ -139,6 +192,14 @@ Marketplace
 
       tabs.forEach(tab => {
         tab.addEventListener('click', () => {
+          if (tab.dataset.tab === 'my-products' && myProductsUrl) {
+            window.location.href = myProductsUrl;
+            return;
+          }
+          if (tab.dataset.tab === 'my-biddings' && myBidsUrl) {
+            window.location.href = myBidsUrl;
+            return;
+          }
           tabs.forEach(t=>t.classList.remove('active'));
           tab.classList.add('active');
           const showDonation = tab.dataset.tab === 'donation';
@@ -150,6 +211,23 @@ Marketplace
               card.style.display = (type !== 'donation') ? '' : 'none';
             }
           });
+        });
+      });
+
+      buyButtons.forEach(btn => {
+        btn.addEventListener('click', () => {
+          const url = btn.dataset.url || '';
+          if (url) {
+            window.location.href = url;
+          }
+        });
+      });
+      bidButtons.forEach(btn => {
+        btn.addEventListener('click', () => {
+          const url = btn.dataset.bidUrl || '';
+          if (url) {
+            window.location.href = url;
+          }
         });
       });
 

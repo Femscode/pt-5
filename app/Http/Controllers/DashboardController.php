@@ -163,7 +163,13 @@ class DashboardController extends Controller
     {
         $user = Auth::user();
         $products = Product::with('images')->orderBy('created_at', 'desc')->get();
-        return view('dashboard.marketplace', compact('user', 'products'));
+        $isSeller = false;
+        if ($user) {
+            $role = $user->role ?? '';
+            $roleType = $user->role_type ?? '';
+            $isSeller = $role === 'seller' || $roleType === 'seller';
+        }
+        return view('dashboard.marketplace', compact('user', 'products', 'isSeller'));
     }
 
     public function productShow(Product $product)

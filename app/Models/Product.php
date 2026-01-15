@@ -35,6 +35,7 @@ class Product extends Model
         'phone_number',
         'photos',
         'created_by',
+        'url',
     ];
 
     protected $casts = [

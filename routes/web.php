@@ -5,6 +5,7 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\MessagesController;
 use App\Http\Controllers\ContactUsController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\SellerProductController;
 use Illuminate\Broadcasting\BroadcastController;
 use Illuminate\Support\Facades\Route;
 
@@ -24,6 +25,18 @@ Route::get('/events/{event}', [DashboardController::class, 'eventShow'])->middle
 Route::post('/events/{event}/subscribe', [DashboardController::class, 'subscribe'])->middleware(['auth', 'verified'])->name('events.subscribe');
 
 Route::get('/marketplace', [DashboardController::class, 'marketplace'])->middleware(['auth', 'verified'])->name('marketplace');
+Route::middleware(['auth'])->group(function () {
+    Route::get('/marketplace/my-products', [SellerProductController::class, 'index'])->name('marketplace.my_products');
+    Route::get('/marketplace/my-products/create', [SellerProductController::class, 'create'])->name('marketplace.products.create');
+    Route::get('/marketplace/my-products/{product}/edit', [SellerProductController::class, 'edit'])->name('marketplace.products.edit');
+    Route::get('/marketplace/bid/{product}', [SellerProductController::class, 'showBidForm'])->name('marketplace.products.bid');
+    Route::post('/marketplace/bid/{product}', [SellerProductController::class, 'submitBid'])->name('marketplace.products.bid.submit');
+    Route::get('/marketplace/my-biddings', [SellerProductController::class, 'myBiddings'])->name('marketplace.my_biddings');
+    Route::get('/marketplace/my-biddings/{bid}', [SellerProductController::class, 'showBid'])->name('marketplace.my_biddings.show');
+    Route::post('/marketplace/my-products', [SellerProductController::class, 'store'])->name('marketplace.products.store');
+    Route::put('/marketplace/my-products/{product}', [SellerProductController::class, 'update'])->name('marketplace.products.update');
+    Route::delete('/marketplace/my-products/{product}', [SellerProductController::class, 'destroy'])->name('marketplace.products.destroy');
+});
 Route::get('/marketplace/{product}', [DashboardController::class, 'productShow'])->middleware(['auth', 'verified'])->name('marketplace.product');
 
 Route::get('/settings', [DashboardController::class, 'settings'])->middleware(['auth', 'verified'])->name('settings');
