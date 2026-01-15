@@ -129,7 +129,7 @@ Marketplace
           </div>
           <div class="card-actions">
             @if(strtolower($p->product_type) !== 'donation')
-              <button type="button" class="btn btn-primary buy-btn" data-url="{{ $p->url ?? '' }}">Buy Now</button>
+              <a target="_blank" type="button" class="btn btn-primary buy-btn" data-url="{{ $p->url ?? '' }}">Buy Now</a>
             @else
               <button type="button" class="btn btn-primary bid-btn" data-bid-url="{{ route('marketplace.products.bid', $p) }}">Bid</button>
             @endif
