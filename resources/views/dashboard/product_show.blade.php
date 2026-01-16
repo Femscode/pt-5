@@ -21,9 +21,16 @@ Marketplace
   <div class="pd-grid">
     <div class="media-col">
       <div class="main-media">
-        @php $first = ($gallery ?? []); $first = count($first) ? $first[0] : null; @endphp
+        @php
+          $first = ($gallery ?? []);
+          $first = count($first) ? $first[0] : null;
+          $isDonation = strtolower($product->product_type ?? '') === 'donation';
+          $imageBase = $isDonation
+            ? 'https://admin.mybridgeinternational.org/mbi-admin-files/public/'
+            : 'https://portal.mybridgeinternational.org/mbi-portal-files/public/';
+        @endphp
         @if($first)
-        <img id="mainImage" src="https://admin.mybridgeinternational.org/mbi-admin-files/public/{{ $first }}" alt="{{ $product->name }}">
+        <img id="mainImage" src="{{ $imageBase . $first }}" alt="{{ $product->name }}">
         @else
         <div class="media placeholder"></div>
         @endif
@@ -31,7 +38,7 @@ Marketplace
       @if(($gallery ?? []) && count($gallery))
       <div class="thumbs" id="thumbs">
         @foreach($gallery as $url)
-        <img class="thumb" src="https://admin.mybridgeinternational.org/mbi-admin-files/public/{{ $url }}" alt="Thumb">
+        <img class="thumb" src="{{ $imageBase . $url }}" alt="Thumb">
         @endforeach
       </div>
       @endif

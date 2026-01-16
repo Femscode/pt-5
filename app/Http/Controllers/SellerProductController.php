@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Product;
+use App\Models\ProductImage;
 use App\Models\ProductBidding;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -130,24 +131,20 @@ class SellerProductController extends Controller
         $product->url = $data['url'] ?? null;
         $product->created_by = $user->id;
 
-        $photos = [];
         if ($request->hasFile('photos')) {
-            $files = $request->file('photos');
-            $dir = public_path('uploads/products');
+            $dir = public_path('product_images');
             if (!is_dir($dir)) {
-                @mkdir($dir, 0775, true);
+                @mkdir($dir, 0755, true);
             }
-            foreach ($files as $file) {
-                if (!$file) {
-                    continue;
-                }
-                $name = 'p' . $user->id . '_' . time() . '_' . uniqid() . '.' . $file->getClientOriginalExtension();
+            foreach ($request->file('photos') as $idx => $file) {
+                $name = time() . '_' . \Illuminate\Support\Str::random(8) . '.' . $file->getClientOriginalExtension();
                 $file->move($dir, $name);
-                $photos[] = 'uploads/products/' . $name;
+                ProductImage::create([
+                    'product_id' => $product->id,
+                    'image_url' => '/product_images/' . $name,
+                    'sort_order' => $idx,
+                ]);
             }
-        }
-        if (!empty($photos)) {
-            $product->photos = $photos;
         }
         $product->save();
 
@@ -212,24 +209,21 @@ class SellerProductController extends Controller
         $product->phone_number = $data['phone_number'] ?? null;
         $product->url = $data['url'] ?? null;
 
-        $photos = is_array($product->photos) ? $product->photos : [];
         if ($request->hasFile('photos')) {
-            $files = $request->file('photos');
-            $dir = public_path('uploads/products');
+            $dir = public_path('product_images');
             if (!is_dir($dir)) {
-                @mkdir($dir, 0775, true);
+                @mkdir($dir, 0755, true);
             }
-            foreach ($files as $file) {
-                if (!$file) {
-                    continue;
-                }
-                $name = 'p' . $user->id . '_' . time() . '_' . uniqid() . '.' . $file->getClientOriginalExtension();
+            $existingCount = $product->images()->count();
+            foreach ($request->file('photos') as $idx => $file) {
+                $name = time() . '_' . \Illuminate\Support\Str::random(8) . '.' . $file->getClientOriginalExtension();
                 $file->move($dir, $name);
-                $photos[] = 'uploads/products/' . $name;
+                ProductImage::create([
+                    'product_id' => $product->id,
+                    'image_url' => '/product_images/' . $name,
+                    'sort_order' => $existingCount + $idx,
+                ]);
             }
-        }
-        if (!empty($photos)) {
-            $product->photos = $photos;
         }
         $product->save();
 

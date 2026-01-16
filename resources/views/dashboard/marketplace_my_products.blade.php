@@ -24,7 +24,7 @@ My Products
     <div class="mp-toolbar" style="margin-bottom:24px;">
       <div>
         <h2 style="margin:0; font-size:18px; font-weight:600;">Manage your products</h2>
-        <p style="margin:4px 0 0; font-size:13px; color:#6b7280;">Create, update, or remove items you listed on the marketplace.</p>
+        <p style="margin:4px 0 0; font-size:15px; color:#6b7280;">Create, update, or remove items you listed on the marketplace.</p>
       </div>
       <div style="display:flex; gap:8px;">
         <a href="{{ route('marketplace') }}" class="btn btn-outline btn-primary">Back to Marketplace</a>

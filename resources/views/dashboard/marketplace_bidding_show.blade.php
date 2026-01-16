@@ -7,7 +7,7 @@
         align-items: center;
         padding: 3px 8px;
         border-radius: 999px;
-        font-size: 12px;
+        font-size: 14px;
       }
       .status-pill.status-pending {
         background: #fffbeb;
@@ -22,12 +22,12 @@
         color: #b91c1c;
       }
       .detail-label {
-        font-size: 12px;
+        font-size: 14px;
         color: #6b7280;
         margin-bottom: 2px;
       }
       .detail-value {
-        font-size: 14px;
+        font-size: 15px;
         color: #111827;
       }
       .bid-detail-layout {
@@ -89,7 +89,7 @@ My Biddings
     <div class="mp-toolbar" style="margin-bottom:24px; margin-top:12px; display:flex; justify-content:space-between; align-items:center; gap:12px; flex-wrap:wrap;">
       <div>
         <h2 style="margin:0; font-size:18px; font-weight:600;">Bidding Details</h2>
-        <p style="margin:4px 0 0; font-size:13px; color:#6b7280;">View the full information for this equipment request.</p>
+        <p style="margin:4px 0 0; font-size:15px; color:#6b7280;">View the full information for this equipment request.</p>
       </div>
       <div style="display:flex; gap:8px;">
         <a href="{{ route('marketplace.my_biddings') }}" class="btn btn-outline btn-primary">Back to My Biddings</a>
@@ -107,21 +107,21 @@ My Biddings
     <div class="bid-detail-layout">
       <div class="bid-detail-top">
         <div>
-          <div style="font-size:13px; color:#6b7280; margin-bottom:4px;">Equipment</div>
+          <div style="font-size:15px; color:#6b7280; margin-bottom:4px;">Equipment</div>
           <div style="font-size:18px; font-weight:600; color:#111827;">
             {{ $product->name ?? ($bid->equipment_name ?: 'Equipment Request') }}
           </div>
-          <div style="margin-top:6px; font-size:12px; color:#6b7280;">
+          <div style="margin-top:6px; font-size:14px; color:#6b7280;">
             Request ID:
             <span style="font-family:mono;">{{ $bid->request_code }}</span>
           </div>
-          <div style="margin-top:4px; font-size:12px; color:#6b7280;">
+          <div style="margin-top:4px; font-size:14px; color:#6b7280;">
             Submitted on {{ $bid->created_at->format('d M Y, H:i') }}
           </div>
         </div>
         <div style="text-align:right; display:flex; flex-direction:column; align-items:flex-end; gap:6px;">
           <span class="status-pill {{ $statusClass }}">{{ $statusLabel }}</span>
-          <div style="font-size:12px; color:#6b7280;">
+          <div style="font-size:14px; color:#6b7280;">
             Latest update: {{ $bid->updated_at->format('d M Y, H:i') }}
           </div>
         </div>
@@ -202,16 +202,16 @@ My Biddings
       <div class="bid-detail-columns-2">
         <div style="background:#fff; border-radius:16px; border:1px solid #e5e7eb; padding:16px 18px;">
           <h3 style="margin:0 0 10px; font-size:15px; font-weight:600;">Statement Of Need</h3>
-          <div class="detail-value" style="white-space:pre-line; font-size:13px; color:#374151;">
+          <div class="detail-value" style="white-space:pre-line; font-size:15px; color:#374151;">
             {{ $bid->statement_of_need }}
           </div>
         </div>
         <div style="background:#fff; border-radius:16px; border:1px solid #e5e7eb; padding:16px 18px;">
           <h3 style="margin:0 0 10px; font-size:15px; font-weight:600;">Intended Use & Impact</h3>
-          <div class="detail-value" style="white-space:pre-line; font-size:13px; color:#374151;">
+          <div class="detail-value" style="white-space:pre-line; font-size:15px; color:#374151;">
             {{ $bid->intended_use }}
           </div>
-          <div style="margin-top:16px; font-size:12px; color:#6b7280;">
+          <div style="margin-top:16px; font-size:14px; color:#6b7280;">
             Agreement:
             <span style="font-weight:500;">
               {{ $bid->agreed ? 'Applicant confirmed that all information provided is accurate.' : 'Agreement not recorded.' }}
