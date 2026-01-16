@@ -17,7 +17,7 @@ class SellerProductController extends Controller
             abort(403);
         }
         $role = $user->category ?? '';
-        if ($role !== 'seller' ) {
+        if ($role !== 'seller') {
             abort(403);
         }
         return $user;
@@ -48,7 +48,7 @@ class SellerProductController extends Controller
     public function index()
     {
         $user = $this->ensureSeller();
-       
+
         $products = Product::with('images')
             ->where('created_by', $user->id)
             ->orderBy('created_at', 'desc')
@@ -130,7 +130,7 @@ class SellerProductController extends Controller
         $product->phone_number = $data['phone_number'] ?? null;
         $product->url = $data['url'] ?? null;
         $product->created_by = $user->id;
-
+        $product->save();
         if ($request->hasFile('photos')) {
             $dir = public_path('product_images');
             if (!is_dir($dir)) {
@@ -146,7 +146,7 @@ class SellerProductController extends Controller
                 ]);
             }
         }
-        $product->save();
+
 
         return redirect()->route('marketplace.my_products')->with('status', 'Product created successfully');
     }
