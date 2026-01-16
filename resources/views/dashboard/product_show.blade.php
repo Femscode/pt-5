@@ -24,7 +24,7 @@ Marketplace
         @php
           $first = ($gallery ?? []);
           $first = count($first) ? $first[0] : null;
-          $isDonation = strtolower($product->product_type ?? '') === 'donation';
+          $isDonation = $product->product_type == 'donation';
           $imageBase = $isDonation
             ? 'https://admin.mybridgeinternational.org/mbi-admin-files/public/'
             : 'https://portal.mybridgeinternational.org/mbi-portal-files/public/';

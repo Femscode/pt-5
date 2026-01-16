@@ -100,8 +100,8 @@ Marketplace
           $thumb = $img->image_url ?? ((is_array($p->photos) && count($p->photos) > 0) ? $p->photos[0] : null);
           $price = $p->price ? (float) $p->price : 0;
           $loc = $p->equipment_location ?? '';
-          $type = strtolower($p->product_type ?? '');
-          $imageBase = $type === 'donation'
+          $type = $p->product_type;
+          $imageBase = $type == 'donation'
             ? 'https://admin.mybridgeinternational.org/mbi-admin-files/public/'
             : 'https://portal.mybridgeinternational.org/mbi-portal-files/public/';
         @endphp
