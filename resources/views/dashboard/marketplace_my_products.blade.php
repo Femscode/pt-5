@@ -42,11 +42,15 @@ My Products
             $thumb = $img->image_url ?? ((is_array($p->photos) && count($p->photos) > 0) ? $p->photos[0] : null);
             $price = $p->price ? (float) $p->price : 0;
             $loc = $p->equipment_location ?? '';
+            $type = $p->product_type;
+            $imageBase = $type == 'donation'
+              ? 'https://admin.mybridgeinternational.org/mbi-admin-files/public/'
+              : 'https://portal.mybridgeinternational.org/mbi-portal-files/public/';
           @endphp
           <div class="mp-card">
             <div class="card-media-wrap">
               @if($thumb)
-                <img class="card-media" src="https://admin.mybridgeinternational.org/mbi-admin-files/public/{{ $thumb }}" alt="{{ $p->name }}">
+                <img class="card-media" src="{{ $imageBase . $thumb }}" alt="{{ $p->name }}">
               @else
                 <div class="card-media placeholder"></div>
               @endif
