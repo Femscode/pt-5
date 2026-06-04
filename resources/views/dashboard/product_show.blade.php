@@ -22,12 +22,12 @@ Marketplace
     <div class="media-col">
       <div class="main-media">
         @php
-          $first = ($gallery ?? []);
-          $first = count($first) ? $first[0] : null;
-          $isDonation = $product->product_type == 'donation';
-          $imageBase = $isDonation
-            ? 'https://admin.mybridgeinternational.org/mbi-admin-files/public/'
-            : 'https://portal.mybridgeinternational.org/mbi-portal-files/public/';
+        $first = ($gallery ?? []);
+        $first = count($first) ? $first[0] : null;
+        $isDonation = $product->product_type == 'donation';
+        $imageBase = $isDonation
+        ? 'https://admin.mybridgeinternational.org/mbi-admin-files/public/'
+        : 'https://portal.mybridgeinternational.org/pt-5/public/';
         @endphp
         @if($first)
         <img id="mainImage" src="{{ $imageBase . $first }}" alt="{{ $product->name }}">
